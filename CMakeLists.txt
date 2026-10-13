@@ -12,9 +12,12 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_executable(riscv-sim
     src/main.cpp
+    src/register_file.cpp
 )
 
-target_compile_options(riscv-sim PRIVATE
+target_include_directories(riscv-sim PRIVATE include)
+
+target_compile_options(riscv-sim PRIVATE 
     -Wall
     -Wextra
     -Wpedantic
