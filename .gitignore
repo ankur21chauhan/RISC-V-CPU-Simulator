@@ -1,0 +1,5 @@
+build/
+riscv-sim
+*.o
+*.a
+*.so
