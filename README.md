@@ -76,7 +76,7 @@ sudo apt install build-essential cmake git
 ### Clone the repository
 
 ```bash
-git clone <YOUR_GITHUB_REPOSITORY_URL>
+git clone https://github.com/ankur21chauhan/RISC-V-CPU-Simulator.git
 cd riscv-cpu-simulator
 ```
 
