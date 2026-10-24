@@ -15,6 +15,7 @@ add_executable(riscv-sim
     src/register_file.cpp
 	src/alu.cpp
 	src/decoder.cpp
+	src/cpu.cpp
 )
 
 target_include_directories(riscv-sim PRIVATE include)
@@ -84,4 +85,33 @@ add_test(
 	NAME DecoderTest
 	COMMAND decoder_test
 )
+
+
+#CPU TEST
+
+add_executable(cpu_test
+	tests/cpu_test.cpp
+	src/cpu.cpp
+	src/register_file.cpp
+	src/alu.cpp
+	src/decoder.cpp
+)
+
+target_include_directories(cpu_test PRIVATE include)
+
+target_compile_options(cpu_test PRIVATE
+	-Wall
+	-Wextra
+	-Wpedantic
+)
+
+add_test(
+	NAME CPUTest
+	COMMAND cpu_test
+)
+
+
+
+
+
 endif()
