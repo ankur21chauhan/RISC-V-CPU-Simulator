@@ -14,6 +14,7 @@ add_executable(riscv-sim
     src/main.cpp
     src/register_file.cpp
 	src/alu.cpp
+	src/decoder.cpp
 )
 
 target_include_directories(riscv-sim PRIVATE include)
@@ -64,7 +65,23 @@ if(BUILD_TESTING)
 		NAME ALUTest
 		COMMAND alu_test
 	)
-	
 
+#Decoder test
 
+add_executable(decoder_test
+	tests/decoder_test.cpp
+	src/decoder.cpp
+)
+
+target_include_directories(decoder_test PRIVATE include)
+
+target_compile_options(decoder_test PRIVATE
+	-Wall
+	-Wextra
+	-Wpedantic
+)
+add_test(
+	NAME DecoderTest
+	COMMAND decoder_test
+)
 endif()
