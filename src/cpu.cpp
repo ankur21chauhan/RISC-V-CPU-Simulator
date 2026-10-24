@@ -3,14 +3,36 @@
 
 CPU::CPU() : pc_(0) {}
 
+void CPU::loadProgram(const std::vector<uint32_t>& program){
+    instruction_memory_ = program;
+    pc_ = 0;
+    //RISC-V R-type integer register-register instructions
+}
+
+bool CPU::step(){
+    if(pc_ % 4 != 0){
+        throw std::runtime_error("PC is not instruction-aligned");
+    }
+    const std::size_t instruction_index = pc_ / 4;
+
+    if(instruction_index >= instruction_memory_.size()){
+        return false;
+    }
+
+    const uint32_t instruction = instruction_memory_[instruction_index];
+
+    execute(instruction);
+
+    return true;
+}
+
 void CPU::execute(uint32_t instruction){
     const uint32_t opcode = decoder_.opcode(instruction);
-
-    //RISC-V R-type integer register-register instructions
 
     if(opcode != 0x33){
         throw std::invalid_argument("Unsupported instruction opcode");
     }
+
 
     const uint32_t destination = decoder_.rd(instruction);
     const uint32_t source1 = decoder_.rs1(instruction);

@@ -2,6 +2,7 @@
 #define CPU_HPP
 
 #include<cstdint>
+#include<vector>
 
 #include "register_file.hpp"
 #include "alu.hpp"
@@ -12,6 +13,9 @@ class CPU{
         CPU();
         void execute(uint32_t instruction); //will decode and execute the instruction
 
+        void loadProgram(const std::vector<uint32_t>& program);
+        bool step();
+
         uint32_t readRegister(uint32_t index) const;
         uint32_t getPC() const;
 
@@ -21,6 +25,8 @@ class CPU{
         RegisterFile registers_; //32 integer register of CPU
         ALU alu_; //arithmetic operations
         Decoder decoder_; //will extract fields of machine instructions
+
+        std::vector<uint32_t> instruction_memory_;
 
         uint32_t pc_;  //Program Counter
 
