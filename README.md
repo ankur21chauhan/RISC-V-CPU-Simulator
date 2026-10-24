@@ -1,13 +1,13 @@
 # RISC-V CPU Simulator
 
-A CPU simulator built from scratch in **C++17**, with the goal of understanding processor architecture, instruction execution, and five-stage pipelining through hands-on implementation.
+A RISC-V CPU simulator built from scratch in **C++17** to explore processor architecture, instruction decoding, arithmetic execution, and eventually five-stage instruction pipelining.
 
-The project is being developed incrementally, starting with foundational CPU components and progressing toward a pipelined RISC-V processor.
+The project is being developed incrementally, with an emphasis on modular C++ design, automated testing, and understanding how CPU components work together.
 
 ## Project Goals
 
 - Understand how CPU components work together.
-- Implement a RISC-V RV32I instruction subset.
+- Implement a subset of RISC-V RV32I instructions.
 - Model registers, instruction execution, and memory operations.
 - Build a five-stage instruction pipeline.
 - Explore data hazards, forwarding, stalls, and control hazards.
@@ -15,32 +15,59 @@ The project is being developed incrementally, starting with foundational CPU com
 
 ## Current Implementation
 
-- [x] C++ project setup
+- [x] C++17 project setup
 - [x] CMake build configuration
-- [x] Register File implementation
+- [x] Register File implementation with 32 integer registers
 - [x] Register initialization and read/write operations
 - [x] Enforce the zero-register behavior (`x0`)
-- [x] Basic Register File tests
+- [x] Register File automated tests
+- [x] Arithmetic Logic Unit (ALU) with addition and subtraction
+- [x] ALU tests, including unsigned arithmetic edge cases
+- [x] R-type instruction field decoding: opcode, `rd`, `funct3`, `rs1`, `rs2`, and `funct7`
+- [x] Decoder automated tests
+- [x] Basic CPU execution engine
+- [x] Register-register `ADD` and `SUB` instruction execution
+- [x] Program Counter initialization and advancement by 4 bytes after successful instructions
+- [x] CPU tests for arithmetic execution, register behavior, PC updates, and unsupported opcodes
+- [x] CTest integration for all four test suites
+
+### Current Limitations
+
+- Only R-type `ADD` and `SUB` instructions are supported by the CPU execution engine.
+- Instructions are currently supplied directly to the execution function; instruction-memory fetching and a program execution loop are not implemented yet.
+- Immediate instructions, branches, jumps, loads, stores, and a five-stage pipeline are not implemented yet.
+- The executable currently demonstrates a single hardcoded `ADD` instruction.
 
 ## Planned Features
 
-- [ ] Arithmetic Logic Unit (ALU)
-- [ ] RISC-V instruction representation and decoding
-- [ ] Instruction execution engine
-- [ ] Instruction and data memory models
+- [ ] Instruction memory and program execution loop
+- [ ] Expanded RV32I instruction support, including immediate and logical operations
+- [ ] Data memory and load/store instructions
+- [ ] Branch and jump instructions
 - [ ] Five-stage pipeline: IF, ID, EX, MEM, WB
 - [ ] Pipeline registers between stages
 - [ ] Data hazard detection and forwarding
 - [ ] Pipeline stalls and branch handling
-- [ ] Clock-cycle execution and pipeline visualization
-- [ ] CPI, cycle count, and speedup analysis
-- [ ] Expanded automated test suite
+- [ ] Cycle-by-cycle pipeline trace or visualization
+- [ ] CPI, cycle count, and performance analysis
+- [ ] Expanded automated test suite and reference validation
 
-*Planned features will be marked complete as they are implemented and tested.*
+*Features will be marked complete only after implementation and testing.*
 
 ## Architecture
 
-The target processor uses the classic five-stage pipeline:
+The current CPU execution engine coordinates three components:
+
+| Component | Responsibility |
+|---|---|
+| Register File | Stores 32 integer registers and enforces the `x0` zero-register rule |
+| ALU | Performs addition and subtraction |
+| Decoder | Extracts R-type instruction fields |
+| CPU | Decodes supported instructions, reads operands, executes the operation, writes back the result, and advances the PC |
+
+### Planned Five-Stage Pipeline
+
+The target processor will use the classic five-stage pipeline:
 
 | Stage | Name | Responsibility |
 |---|---|---|
@@ -50,7 +77,7 @@ The target processor uses the classic five-stage pipeline:
 | MEM | Memory Access | Read or write data memory |
 | WB | Write Back | Write the result to the destination register |
 
-The intended design allows multiple instructions to occupy different stages during the same clock cycle.
+The intended design will allow multiple instructions to occupy different stages during the same clock cycle.
 
 ## Technology Stack
 
@@ -58,7 +85,7 @@ The intended design allows multiple instructions to occupy different stages duri
 - **Build system:** CMake
 - **Compiler:** GCC or another compatible C++17 compiler
 - **Version control:** Git
-- **Testing:** C++ assertions initially; CTest integration planned
+- **Testing:** C++ assertions integrated with CTest
 
 ## Getting Started
 
@@ -73,80 +100,77 @@ sudo apt update
 sudo apt install build-essential cmake git
 ```
 
-### Clone the repository
+### Clone the Repository
 
 ```bash
 git clone https://github.com/ankur21chauhan/RISC-V-CPU-Simulator.git
-cd riscv-cpu-simulator
+cd RISC-V-CPU-Simulator
 ```
 
-Replace the placeholder with your repository's actual clone URL.
-
-### Build the project
+### Build the Project
 
 ```bash
 cmake -S . -B build
 cmake --build build
 ```
 
-### Run the current executable
+### Run the Simulator
 
 ```bash
 ./build/riscv-sim
 ```
 
-The executable currently verifies the project foundation. Full RISC-V instruction execution and pipeline simulation are part of the development roadmap.
+The current executable initializes the CPU, sets sample register values, executes a hardcoded `ADD` instruction, and prints the register values before and after execution.
 
-### Run the Register File tests
-
-Compile the current test directly:
+### Run the Automated Tests
 
 ```bash
-g++ -std=c++17 -Wall -Wextra -Wpedantic \
-    -Iinclude \
-    tests/register_file_test.cpp \
-    src/register_file.cpp \
-    -o build/register_file_test
+ctest --test-dir build --output-on-failure
 ```
 
-Run it:
+The test suite currently covers:
 
-```bash
-./build/register_file_test
-```
-
-Expected output:
-
-```text
-All Register File tests passed!
-```
+- Register File behavior
+- ALU operations
+- R-type instruction field decoding
+- Basic CPU instruction execution
 
 ## Project Structure
 
 ```text
-riscv-cpu-simulator/
+RISC-V-CPU-Simulator/
 ├── CMakeLists.txt
 ├── .gitignore
 ├── README.md
 ├── include/
-│   └── register_file.hpp
+│   ├── register_file.hpp
+│   ├── alu.hpp
+│   ├── decoder.hpp
+│   └── cpu.hpp
 ├── src/
 │   ├── main.cpp
-│   └── register_file.cpp
+│   ├── register_file.cpp
+│   ├── alu.cpp
+│   ├── decoder.cpp
+│   └── cpu.cpp
 ├── tests/
-│   └── register_file_test.cpp
+│   ├── register_file_test.cpp
+│   ├── alu_test.cpp
+│   ├── decoder_test.cpp
+│   └── cpu_test.cpp
 ├── examples/
 └── docs/
 ```
 
-The structure will evolve as additional CPU components and tests are introduced.
+The project structure will evolve as additional CPU components and tests are introduced.
 
 ## Design Principles
 
 - Build each component incrementally.
 - Keep interfaces and implementations separate.
-- Test component behavior before integrating it.
+- Test component behavior before integration.
 - Use clear abstractions for CPU state and instruction execution.
+- Maintain a reproducible build and test workflow.
 - Track development milestones using Git.
 
 ## Learning Objectives
@@ -154,18 +178,19 @@ The structure will evolve as additional CPU components and tests are introduced.
 This project is intended to build practical understanding of:
 
 - Computer organization and architecture
-- RISC-V instruction semantics
-- C++ classes, arrays, and modular design
-- CPU registers and ALU operations
+- RISC-V instruction encoding and semantics
+- C++ classes and modular design
+- Bit manipulation and fixed-width integer arithmetic
+- CPU registers, ALU operations, and instruction execution
 - Instruction pipelining and hazards
-- Debugging, testing, and build systems
+- Debugging, automated testing, and build systems
 - Processor performance metrics
 
 ## Project Status
 
-**Early development — foundational components**
+**Early development — basic instruction execution implemented.**
 
-The Register File is implemented with basic tests. The five-stage pipeline and instruction execution engine are planned milestones, not yet completed features.
+The Register File, ALU, Decoder, and a basic CPU execution engine are implemented with automated tests. The current engine supports R-type `ADD` and `SUB` instructions. Instruction-memory fetching, a program execution loop, data memory, and the five-stage pipeline remain planned work.
 
 ## License
 
