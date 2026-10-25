@@ -3,6 +3,7 @@
 #include<cassert>
 #include<cstdint>
 #include<iostream>
+#include<vector>
 #include<stdexcept>
 
 int main(){
@@ -46,6 +47,61 @@ int main(){
     assert(cpu.getPC() == 8);
 
     std::cout<<"All CPU tests passed!\n";
+
+    //Test PC-based instruction fetching
+    CPU program_cpu;
+
+    program_cpu.setRegister(10,15);
+    program_cpu.setRegister(11, 20);
+
+
+    const std::vector<uint32_t> program = {
+        0x00B50633, //ADD x12, x10, x11
+        0x40A606B3 //SUB x13, x12, x10
+    };
+
+    program_cpu.loadProgram(program);
+    assert(program_cpu.getPC() == 0);
+
+    //first fetched instruction
+    assert(program_cpu.step());
+    assert(program_cpu.readRegister(12) == 35);
+    assert(program_cpu.getPC() == 4);
+
+    //Second fetched instruction
+    assert(program_cpu.step());
+    assert(program_cpu.readRegister(13) == 20);
+    assert(program_cpu.getPC() == 8);
+
+    //No more instruction remain
+    assert(!program_cpu.step());
+    assert(program_cpu.getPC() == 8);
+
+
+    CPU addi_cpu;
+    addi_cpu.loadProgram({
+        0x00A00293,
+        0x01428313,
+        0xFFF30393
+    });
+
+    assert(addi_cpu.step());
+    assert(addi_cpu.readRegister(5) == 10);
+    assert(addi_cpu.getPC() == 4);
+
+    assert(addi_cpu.step());
+    assert(addi_cpu.readRegister(6) == 30);
+    assert(addi_cpu.getPC() == 8);
+
+    assert(addi_cpu.step());
+    assert(addi_cpu.readRegister(7) == 29);
+    assert(addi_cpu.getPC() == 12);
+
+    assert(!addi_cpu.step());
+    assert(addi_cpu.getPC() == 12);
+
+
+
 
     return 0;
 

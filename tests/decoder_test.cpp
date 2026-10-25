@@ -17,5 +17,11 @@ int main(){
 
     std::cout<<"All Decoder test passed!\n";
 
+    //ADDI x5, x0, 10
+    assert(decoder.immediateI(0x00A00293) == 10);
+
+    //ADDI x6, x0, -1
+    assert(decoder.immediateI(0xFFF00313) == 0xFFFFFFFFu);
+
     return 0;
 }
