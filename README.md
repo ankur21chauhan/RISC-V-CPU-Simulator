@@ -277,4 +277,8 @@ The next milestones are indirect jumps, conditional branches, additional arithme
 
 ## License
 
-License selection is pending. A license will be added when the project's distribution terms are decided.
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
+You are free to use, modify, and distribute this software in accordance with the terms of the license.
