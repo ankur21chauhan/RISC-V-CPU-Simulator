@@ -277,8 +277,6 @@ The next milestones are indirect jumps, conditional branches, additional arithme
 
 ## License
 
-## License
-
 This project is licensed under the [MIT License](LICENSE).
 
 You are free to use, modify, and distribute this software in accordance with the terms of the license.
