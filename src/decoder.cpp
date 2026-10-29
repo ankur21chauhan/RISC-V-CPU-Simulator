@@ -34,3 +34,8 @@ uint32_t Decoder::immediateI(uint32_t instruction) const{
 
     return immediate;
 }
+
+
+uint32_t Decoder::immediateU(uint32_t instruction) const{
+    return instruction & 0xFFFFF000; //0xFFFFF000 is a bitmask
+}

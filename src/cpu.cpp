@@ -81,6 +81,13 @@ void CPU::execute(uint32_t instruction) {
         registers_.write(destination, result);
     }
 
+    else if(opcode == 0x37){ //0x37 LUI opcode
+        const uint32_t destination = decoder_.rd(instruction);
+        const uint32_t result = decoder_.immediateU(instruction);
+
+        registers_.write(destination, result);
+    }
+
     else {
         throw std::invalid_argument("Unsupported instruction opcode");
     }

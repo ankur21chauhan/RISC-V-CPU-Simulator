@@ -1,60 +1,54 @@
-#include<cstdint>
-#include<vector>
-#include<iostream>
+#include <cstdint>
+#include <vector>
+#include <iostream>
 
-#include"cpu.hpp"
+#include "cpu.hpp"
 
 using namespace std;
 
+int main() {
+    CPU cpu;
 
-int main(){
-	CPU cpu;
+    /*
+        Three machine instructions:
+        ADDI x5, x0, 10  -> x5 = 0 + 10 = 10
+        ADDI x6, x5, 20  -> x6 = 10 + 20 = 30
+        ADD  x7, x5, x6  -> x7 = 10 + 30 = 40
+    */
+    const vector<uint32_t> program = {
+        0x00A00293, //ADDI x5, x0, 10
+        0x01428313, //AADI x6, x5, 20
+        0x006283B3, // AADI x7, x5, x5
+        0x123453B7 // LUI x7, 0x12345
+    };
 
-	//set initial register values
-	cpu.setRegister(10, 15);
-	cpu.setRegister(11, 20);
+    cpu.loadProgram(program);
 
-	/*
-	Three Machine instructions:
-	ADD x12, x10, x11 -> x12 = 15+20 = 35
-	SUB x13, x12, x10 -> x13 = 35 - 15 = 20
-	ADD x14, x13, x11 -> x14 = 20 + 20 = 40 */
-	const std::vector<uint32_t> program = {
-		0x00B50633,
-		0x40A606B3,
-		0x00B68733
-	};
+    cout << "RISC-V CPU SIMULATOR\n";
+    cout << "--------------------\n";
+    cout << "Starting Program Execution!\n";
 
-	cpu.loadProgram(program);
+    size_t instruction_number = 1;
 
-	cout<<"RISC-V CPU SIMULATOR\n";
-	cout<<"--------------------\n";
-	cout<<"Starting Program Execution!\n";
+    while (true) {
+        const uint32_t pc_before = cpu.getPC();
 
-	size_t instruction_number = 1;
+        if (!cpu.step()) {
+            break;
+        }
 
-	while(true){
-		const uint32_t pc_before = cpu.getPC();
-		if(!cpu.step()){
-			break;
-		}
+        cout << "\nInstruction " << instruction_number++ << "\n";
+        cout << "PC before : " << pc_before << '\n';
+        cout << "PC after  : " << cpu.getPC() << '\n';
+    }
 
-		cout<<"\nInstruction" <<instruction_number++ <<"\n";
-		cout<<"PC before : "<<pc_before <<'\n';
-		cout<<"PC after : "<<cpu.getPC() << '\n';
-	}
-
-	cout << "\nFinal register state:\n";
-    cout << "x10 = " << cpu.readRegister(10) << '\n';
-    cout << "x11 = " << cpu.readRegister(11) << '\n';
-	cout << "x12 = " << cpu.readRegister(12) << '\n';
-	cout << "x13 = " << cpu.readRegister(13) << '\n';
-	cout << "x14 = " << cpu.readRegister(14) << '\n';
-    cout << "PC   = " << cpu.getPC() << '\n';
+    cout << "\nFinal register state:\n";
+    cout << "x5  = " << cpu.readRegister(5) << '\n';
+    cout << "x6  = " << cpu.readRegister(6) << '\n';
+    cout << "x7  = " << cpu.readRegister(7) << '\n';
+    cout << "PC  = " << cpu.getPC() << '\n';
 
     cout << "\nProgram execution completed!\n";
 
-	return 0;
-
-
+    return 0;
 }

@@ -23,5 +23,7 @@ int main(){
     //ADDI x6, x0, -1
     assert(decoder.immediateI(0xFFF00313) == 0xFFFFFFFFu);
 
+    assert(decoder.immediateU(0x12345287) == 0x12345000);
+
     return 0;
 }

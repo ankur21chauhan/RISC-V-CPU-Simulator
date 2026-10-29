@@ -11,6 +11,7 @@ public:
     uint32_t rs2(uint32_t instruction) const;
     uint32_t funct7(uint32_t instruction) const;
     uint32_t immediateI(uint32_t instruction) const;
+    uint32_t immediateU(uint32_t instruction) const;
 
 };
 
