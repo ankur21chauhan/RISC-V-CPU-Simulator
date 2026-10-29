@@ -143,6 +143,77 @@ int main(){
     lui_cpu.execute(0x12345037); //LUI 0x, 0x12345
     assert(lui_cpu.readRegister(0) == 0);
 
+
+    //AUIPC Test
+    CPU auipc_cpu;
+
+    //PC starts at 0
+    auipc_cpu.execute(0x12345297); //AUIPC x5, 0x12345
+
+    assert(auipc_cpu.readRegister(5) == 0x12345000);
+    assert(auipc_cpu.getPC() == 4);
+
+
+    CPU auipc_pc_cpu;
+
+    auipc_pc_cpu.loadProgram({
+        0x00000013, //ADDI 0x, x0, 0 (NOP)
+        0x12345297 //AUIPC x5, 0x12345
+    });
+
+    assert(auipc_pc_cpu.step());
+    assert(auipc_pc_cpu.getPC() == 4);
+
+    assert(auipc_pc_cpu.step());
+    assert(auipc_pc_cpu.readRegister(5) == 0x12345004);
+    assert(auipc_pc_cpu.getPC() == 8);
+
+
+
+
+
+    // JAL TESTS
+    //JAL TEST1 : Positive jump offset
+    CPU jal_cpu;
+
+    jal_cpu.execute(0x008002EF);  // JAL x5, 8
+    
+    assert(jal_cpu.readRegister(5) == 4);
+    assert(jal_cpu.getPC() == 8);
+
+    //JAL TEST2 : Negative jump offset
+    CPU jal_negaive_cpu;
+    
+    jal_negaive_cpu.loadProgram({
+        0x00000013, //NOP
+        0x00000013, //NOP
+        0x00000013, //NOP
+        0x00000013, //NOP
+        0XFF9FF2EF //JAL x5, -8
+    });
+
+    //Execute four NOPs; PC advances from 0 to 16.
+    assert(jal_negaive_cpu.step());
+    assert(jal_negaive_cpu.step());
+    assert(jal_negaive_cpu.step());
+    assert(jal_negaive_cpu.step());
+
+    assert(jal_negaive_cpu.getPC() == 16);
+
+    //Execute JAL x5, -8
+    assert(jal_negaive_cpu.step());
+
+    assert(jal_negaive_cpu.readRegister(5) == 20);
+    assert(jal_negaive_cpu.getPC() == 8);
+
+
+    //JAL Test3 : Destination is x0
+    CPU jal_x0_cpu;
+
+    jal_x0_cpu.execute(0x0080006F); //JAL x0, 8
+    assert(jal_x0_cpu.readRegister(0) == 0);
+    assert(jal_x0_cpu.getPC() == 8);
+
     return 0;
 
 }

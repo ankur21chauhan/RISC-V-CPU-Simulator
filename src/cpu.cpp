@@ -28,6 +28,7 @@ bool CPU::step() {
 
 void CPU::execute(uint32_t instruction) {
     const uint32_t opcode = decoder_.opcode(instruction);
+    bool advance_pc = true;
 
     // R-type instructions: ADD and SUB
     if (opcode == 0x33) {
@@ -80,7 +81,8 @@ void CPU::execute(uint32_t instruction) {
 
         registers_.write(destination, result);
     }
-
+    
+    // LUI BLOCK
     else if(opcode == 0x37){ //0x37 LUI opcode
         const uint32_t destination = decoder_.rd(instruction);
         const uint32_t result = decoder_.immediateU(instruction);
@@ -88,13 +90,43 @@ void CPU::execute(uint32_t instruction) {
         registers_.write(destination, result);
     }
 
+    // AUIPC BLOCK
+    else if(opcode == 0x17){
+        const uint32_t destination = decoder_.rd(instruction);
+        const uint32_t immediate = decoder_.immediateU(instruction);
+
+        const uint32_t result = pc_ + immediate;
+        registers_.write(destination, result);
+    }
+
+
+    // JAL BLOCK
+    else if(opcode == 0x6F){
+        //JAL: rd = PC + 4; PC = PC + immediate
+
+        const uint32_t destination = decoder_.rd(instruction);
+        const uint32_t immediate = decoder_.immediateJ(instruction);
+
+        const uint32_t old_pc = pc_;
+        const uint32_t return_address = old_pc + 4;
+        const uint32_t target_pc = old_pc + immediate;
+
+        registers_.write(destination, return_address);
+        pc_ = target_pc;
+
+        //JAL has already updated the PC
+        advance_pc = false;
+    }
+
     else {
         throw std::invalid_argument("Unsupported instruction opcode");
     }
 
     // Advance PC only after successful instruction execution.
-    // Each supported RV32I instruction is 4 bytes wide.
-    pc_ += 4;
+    
+    if(advance_pc){
+        pc_ += 4;
+    }
 }
 
 uint32_t CPU::readRegister(uint32_t index) const {

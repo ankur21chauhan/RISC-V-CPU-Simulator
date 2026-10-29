@@ -39,3 +39,20 @@ uint32_t Decoder::immediateI(uint32_t instruction) const{
 uint32_t Decoder::immediateU(uint32_t instruction) const{
     return instruction & 0xFFFFF000; //0xFFFFF000 is a bitmask
 }
+
+//JAL immediate range −1,048,576 to +1,048,574 bytes
+uint32_t Decoder::immediateJ(uint32_t instruction) const{
+    uint32_t immediate = 0;
+
+    immediate |= ((instruction >> 31) & 0x1) <<20;
+    immediate |= ((instruction >> 21) & 0x3FF) << 1;
+    immediate |= ((instruction >> 20) & 0x1) << 11;
+    immediate |= ((instruction) >> 12 & 0xFF) << 12;
+
+    //Sign-extend the 21-bit immediate
+    if ((immediate & 0x100000) != 0){
+        immediate |= 0xFFE00000;
+    }
+
+    return immediate;
+}
