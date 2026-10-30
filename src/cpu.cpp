@@ -118,6 +118,31 @@ void CPU::execute(uint32_t instruction) {
         advance_pc = false;
     }
 
+    // JALR BLOCK
+    else if(opcode == 0x67){
+        if(decoder_.funct3(instruction) != 0){
+            throw std::invalid_argument("Invalid JALR funct3");
+        }
+        
+        //JALR: rd = PC + 4; PC = (rs1 + immediate) & -1
+
+        const uint32_t destination = decoder_.rd(instruction);
+        const uint32_t source = decoder_.rs1(instruction);
+        const uint32_t immediate = decoder_.immediateI(instruction);
+
+        const uint32_t old_pc = pc_;
+        const uint32_t source_value = registers_.read(source);
+
+        const uint32_t return_address =  old_pc + 4;
+        const uint32_t target_pc = (source_value + immediate) & -uint32_t{1};
+
+        registers_.write(destination, return_address);
+        pc_ = target_pc;
+
+        //JALR has already updated the PC.
+        advance_pc = false;
+
+    }
     else {
         throw std::invalid_argument("Unsupported instruction opcode");
     }
