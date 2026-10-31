@@ -19,11 +19,11 @@ The project is being developed incrementally, with an emphasis on modular C++ de
 
 - [x] C++17 project setup
 - [x] CMake build configuration
-- [x] Register File with 32 integer registers
+- [x] Register file with 32 integer registers
 - [x] Register initialization and read/write operations
 - [x] Enforce the zero-register behavior (`x0`)
 - [x] Arithmetic Logic Unit (ALU) with addition and subtraction
-- [x] Instruction Decoder for supported instruction fields and immediates
+- [x] Instruction decoder for supported instruction fields and immediates
 - [x] Basic CPU instruction execution engine
 - [x] Instruction memory using a vector of 32-bit instructions
 - [x] Program loading through `loadProgram()`
@@ -42,28 +42,38 @@ The project is being developed incrementally, with an emphasis on modular C++ de
 | `LUI` | U-type | Load an upper immediate | Implemented |
 | `AUIPC` | U-type | Add an upper immediate to the current PC | Implemented |
 | `JAL` | J-type | Save the return address and jump to a PC-relative target | Implemented |
+| `JALR` | I-type | Save the return address and jump to a register-relative target | Implemented |
+| `BEQ` | B-type | Branch if two registers are equal | Implemented |
+| `BNE` | B-type | Branch if two registers are not equal | Implemented |
+| `BLT` | B-type | Branch if signed `rs1 < rs2` | Implemented |
+| `BGE` | B-type | Branch if signed `rs1 >= rs2` | Implemented |
+| `BLTU` | B-type | Branch if unsigned `rs1 < rs2` | Implemented |
+| `BGEU` | B-type | Branch if unsigned `rs1 >= rs2` | Implemented |
 
-These instructions have been integrated into the CPU execution engine. Automated tests cover the core components and supported instruction behavior.
+These instructions have been added to the CPU execution engine. Test coverage is expanding alongside implementation; passing the current test suites does not imply every possible instruction edge case has been tested.
 
-### JAL Testing
+### Jump and Branch Testing
 
-The current JAL tests cover:
+Tests currently cover selected behavior such as:
 
-- Positive jump offsets
-- Negative jump offsets
+- `JAL` positive and negative offsets
 - Saving the return address as `PC + 4`
 - Jumping to the calculated target address
 - Writing to `x0` without changing its value
-- Avoiding an additional normal PC increment after a jump
+- `JALR` positive and negative offsets, and `x0` destination behavior
+- B-type immediate extraction, including positive, negative, and zero offsets
+- Conditional branch taken and not-taken behavior
+- Signed and unsigned comparison examples for branch instructions
+
+Additional edge-case coverage will be added as the instruction set expands.
 
 ## Current Limitations
 
 - Only a subset of RV32I instructions is supported.
-- `JALR` and conditional branch instructions have not yet been implemented.
-- Logical, shift, comparison, and remaining arithmetic instructions are pending.
+- Additional arithmetic, logical, comparison, and shift instructions remain to be implemented, including `SLT` and `SLTU`.
 - Data memory and load/store instructions are not yet implemented.
 - The current simulator does not implement a five-stage instruction pipeline.
-- Pipeline registers, hazard detection, forwarding, stalls, and branch handling remain future work.
+- Pipeline registers, hazard detection, forwarding, stalls, and control-hazard handling remain future work.
 - Performance analysis using CPI, clock cycles, and speedup has not yet been implemented.
 - The instruction set and test coverage will expand as development progresses.
 
@@ -84,9 +94,9 @@ The current JAL tests cover:
 - [x] `LUI`
 - [x] `AUIPC`
 - [x] `JAL`
-- [ ] `JALR`
-- [ ] Conditional branches: `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, `BGEU`
-- [ ] Remaining selected RV32I arithmetic, logical, comparison, and shift instructions
+- [x] `JALR`
+- [x] Conditional branches: `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, `BGEU`
+- [ ] Remaining selected RV32I arithmetic, logical, comparison, and shift instructions (including `SLT` and `SLTU`)
 - [ ] Data memory
 - [ ] Load instructions: `LB`, `LH`, `LW`, `LBU`, `LHU`
 - [ ] Store instructions: `SB`, `SH`, `SW`
@@ -107,7 +117,7 @@ The current JAL tests cover:
 - [ ] Data hazard detection
 - [ ] Data forwarding
 - [ ] Pipeline stalls
-- [ ] Control hazard handling
+- [ ] Control-hazard handling
 - [ ] Cycle-by-cycle pipeline trace or visualization
 - [ ] Cycle count and CPI calculations
 - [ ] Performance analysis and speedup comparisons
@@ -127,8 +137,6 @@ The current CPU execution engine coordinates the Register File, ALU, Decoder, in
 | Instruction Memory | Stores the program as 32-bit instruction words |
 
 ### Program Execution Flow
-
-The current instruction execution flow is:
 
 1. Load a program into instruction memory using `loadProgram()`.
 2. Fetch the instruction at the address specified by the PC.
@@ -210,7 +218,7 @@ The project currently contains four test suites:
 - `DecoderTest`
 - `CPUTest`
 
-These test suites cover register behavior, arithmetic operations, instruction decoding, and supported CPU instruction execution.
+These suites cover register behavior, arithmetic operations, instruction decoding, and supported CPU instruction execution. The current local test run reports all four suites passing.
 
 ## Project Structure
 
@@ -269,11 +277,11 @@ This project is intended to build practical understanding of:
 
 **Core CPU components implemented; expanded RV32I instruction support in progress.**
 
-The Register File, ALU, Decoder, instruction memory, and basic CPU execution engine are implemented. The current execution engine supports `ADD`, `SUB`, `ADDI`, `LUI`, `AUIPC`, and `JAL`.
+The Register File, ALU, Decoder, instruction memory, and basic CPU execution engine are implemented. The current execution engine supports `ADD`, `SUB`, `ADDI`, `LUI`, `AUIPC`, `JAL`, `JALR`, `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, and `BGEU`.
 
-Automated tests cover the four main test suites, including selected positive and negative JAL offsets and return-address behavior.
+The project currently has four CTest suites, and the latest local run reported all four passing. Instruction-specific edge-case coverage will continue to expand.
 
-The next milestones are indirect jumps, conditional branches, additional arithmetic and logical instructions, data memory operations, and eventually the five-stage pipeline with hazard handling and performance analysis.
+The next milestones are additional arithmetic, logical, comparison, and shift instructions; data memory operations; and eventually the five-stage pipeline with hazard handling and performance analysis.
 
 ## License
 
