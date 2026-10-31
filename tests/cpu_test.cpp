@@ -100,7 +100,7 @@ int main(){
     assert(!addi_cpu.step());
     assert(addi_cpu.getPC() == 12);
 
-    //ADDI edge-case tests
+    //-----------ADDI edge-case tests-----------
     CPU edge_cpu;
 
     //Test 1: immediate ZERO
@@ -128,7 +128,9 @@ int main(){
     edge_cpu.execute(0x00100013); // ADDI x0, x0, 1
     assert(edge_cpu.readRegister(0) == 0);
 
-    //LUI instruction tests
+
+    
+    //----------LUI instruction tests---------
     CPU lui_cpu;
 
     //Test1: Load upper immediate
@@ -144,7 +146,7 @@ int main(){
     assert(lui_cpu.readRegister(0) == 0);
 
 
-    //AUIPC Test
+    //----------AUIPC Test----------
     CPU auipc_cpu;
 
     //PC starts at 0
@@ -172,7 +174,7 @@ int main(){
 
 
 
-    // JAL TESTS
+    // ----------JAL TESTS----------
     //JAL TEST1 : Positive jump offset
     CPU jal_cpu;
 
@@ -217,7 +219,7 @@ int main(){
 
 
 
-    // JALR TESTS
+    // ----------JALR TESTS-----------
     // JALR Test1 : Positive immediate
     CPU jalr_positive_cpu;
 
@@ -255,7 +257,8 @@ int main(){
     assert(jalr_x0_cpu.getPC() == 120);
 
 
-    //BEQ Tests
+
+    //------------BEQ Tests------------
     //BEQ Test1 : Branch taken (x1 == x2)
     CPU beq_taken_cpu;
 
@@ -306,6 +309,150 @@ int main(){
 
 
 
+
+    //-----------BNE Tests--------------
+    //BNE Test1 : Branch taken (x1 != x2)
+    CPU bne_taken_cpu;
+
+    bne_taken_cpu.setRegister(1, 10);
+    bne_taken_cpu.setRegister(2, 20);
+
+    //BNE x1, x2, +8
+    bne_taken_cpu.execute(0x00209463);
+
+    assert(bne_taken_cpu.getPC() == 8);
+
+
+    //BNE Test2 : Branch not taken (x1 == x2)
+    CPU bne_not_taken_cpu;
+
+    bne_not_taken_cpu.setRegister(1, 10);
+    bne_not_taken_cpu.setRegister(2, 10);
+
+    //BNE x1, x2, +8
+    bne_not_taken_cpu.execute(0x00209463);
+
+    assert(bne_not_taken_cpu.getPC() == 4);
+
+
+    //BNE Test3 : Negative branch offset
+    CPU bne_negative_cpu;
+
+    bne_negative_cpu.setRegister(1, 10);
+    bne_negative_cpu.setRegister(2, 20);
+
+    bne_negative_cpu.loadProgram({
+        0x00000013, //NOP
+        0x00000013, //NOP
+        0x00000013, //NOP
+        0x00000013, //NOP
+        0xFE209CE3 //BNE x1, x2, -8
+    });
+
+    assert(bne_negative_cpu.step());
+    assert(bne_negative_cpu.step());
+    assert(bne_negative_cpu.step());
+    assert(bne_negative_cpu.step());
+
+    assert(bne_negative_cpu.getPC() == 16);
+
+    assert(bne_negative_cpu.step());
+
+    assert(bne_negative_cpu.getPC() == 8);
+
+
+    //-----------BLT Tests--------------    
+    //BLT Test1 : Branch taken (5 < 10)
+    CPU blt_taken_cpu;
+    blt_taken_cpu.setRegister(1, 5);
+    blt_taken_cpu.setRegister(2, 10);
+    blt_taken_cpu.execute(0x0020C463); //BLT x1, x2, +8
+    assert(blt_taken_cpu.getPC() == 8);
+
+    //BLT Test2 : Branch not taken (10 < 5 is false)
+    CPU blt_not_taken_cpu;
+    blt_not_taken_cpu.setRegister(1, 10);
+    blt_not_taken_cpu.setRegister(2, 5);
+    blt_not_taken_cpu.execute(0x0020C463); //BLT x1, x2, +8
+    assert(blt_not_taken_cpu.getPC() == 4);
+
+    //BLT Test3 : Negative signed value (-1 < 3)
+    CPU blt_signed_cpu;
+    blt_signed_cpu.setRegister(1, 0xFFFFFFFF);
+    blt_signed_cpu.setRegister(2, 3);
+    blt_signed_cpu.execute(0x0020C463); //BLT x1, x3, +8
+    assert(blt_signed_cpu.getPC() == 8);
+
+
+    //-----------BGE Tests--------------
+    //BGE Test 1 : Branch taken (10 >= 5)
+    CPU bge_taken_cpu;
+    bge_taken_cpu.setRegister(1, 10);
+    bge_taken_cpu.setRegister(2, 5);
+    bge_taken_cpu.execute(0x0020D463); //BGE x1, x2, +8
+    assert(bge_taken_cpu.getPC() == 8);
+
+    //BGE Test 2 : Branch not taken (S > = 10 is false)
+    CPU bge_not_taken_cpu;
+    bge_not_taken_cpu.setRegister(1, 5);
+    bge_not_taken_cpu.setRegister(2, 10);
+    bge_not_taken_cpu.execute(0x0020D463);
+    assert(bge_not_taken_cpu.getPC() == 4);
+
+    //BGE Test 3 : Negative signed comparison (-1 >= 3 is false)
+    CPU bge_signed_cpu;
+    bge_signed_cpu.setRegister(1, 0xFFFFFFFF);
+    bge_signed_cpu.setRegister(2, 3);
+    bge_signed_cpu.execute(0x0020D463);
+    assert(bge_signed_cpu.getPC() == 4);
+
+
+
+    //-----------BLTU Tests--------------
+    //BLTU Test 1 : Branch taken (2 < 3)
+    CPU bltu_taken_cpu;
+    bltu_taken_cpu.setRegister(1, 2);
+    bltu_taken_cpu.setRegister(2, 3);
+    bltu_taken_cpu.execute(0x0020E463); //BLTU x1, x2, +8
+    assert(bltu_taken_cpu.getPC() == 8);
+
+    //BLTU Test 2 : Branch not taken (3 < 2 is false)
+    CPU bltu_not_taken_cpu;
+    bltu_not_taken_cpu.setRegister(1, 3);
+    bltu_not_taken_cpu.setRegister(2, 2);
+    bltu_not_taken_cpu.execute(0x0020E463);
+    assert(bltu_not_taken_cpu.getPC() == 4);
+
+    //BLTU Test 3 : 0xFFFFFFFF is a large unsigned value
+    CPU bltu_unsigned_cpu;
+    bltu_unsigned_cpu.setRegister(1, 0xFFFFFFFF);
+    bltu_unsigned_cpu.setRegister(2, 3);
+    bltu_unsigned_cpu.execute(0x0020E463);
+    assert(bltu_unsigned_cpu.getPC() == 4);
+
+
+
+    //-----------BGEU Tests--------------
+    //BGEU Test 1 : Branch taken (10 >= 5)
+    CPU bgeu_taken_cpu;
+    bgeu_taken_cpu.setRegister(1, 10);
+    bgeu_taken_cpu.setRegister(2, 5);
+    bgeu_taken_cpu.execute(0x0020F463); //BGEU x1, x2, +8
+    assert(bgeu_taken_cpu.getPC() == 8) ;
+
+    //BGEU Test 2 : branch not taken (5 >= 10 is false)
+    CPU bgeu_not_taken_cpu;
+    bgeu_not_taken_cpu.setRegister(1, 5);
+    bgeu_not_taken_cpu.setRegister(2, 10);
+    bgeu_not_taken_cpu.execute(0x0020F463);
+    assert(bgeu_not_taken_cpu.getPC() == 4);
+
+    //BGEU Test 3 : Large unsigned value >= 3
+    CPU bgeu_unsigned_cpu;
+    bgeu_unsigned_cpu.setRegister(1, 0xFFFFFFFF);
+    bgeu_unsigned_cpu.setRegister(2, 3);
+    bgeu_unsigned_cpu.execute(0x0020F463);
+    assert(bgeu_unsigned_cpu.getPC() == 8);
     return 0;
 
 }

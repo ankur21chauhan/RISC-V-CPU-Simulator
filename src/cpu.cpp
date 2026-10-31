@@ -144,6 +144,7 @@ void CPU::execute(uint32_t instruction) {
 
     }
 
+    // BEQ, BNE, BLT, BGE, BLTU, BGEU BLOCK
     else if(opcode == 0x63){
         //BEQ: if (rs1 == rs2), PC = PC + immediate
 
@@ -151,20 +152,51 @@ void CPU::execute(uint32_t instruction) {
         const uint32_t source2 = decoder_.rs2(instruction);
         const uint32_t funct3 = decoder_.funct3(instruction);
 
-        if(funct3 == 0x0){
-            const uint32_t value1 = registers_.read(source1);
-            const uint32_t value2  = registers_.read(source2);
-            const uint32_t immediate = decoder_.immediateB(instruction);
+        const uint32_t value1 = registers_.read(source1);
+        const uint32_t value2 = registers_.read(source2);
 
-            if(value1 == value2){
-                pc_ += immediate;
-                advance_pc = false;
-            }
+        const uint32_t immediate = decoder_.immediateB(instruction);
+
+        bool branch_taken = false;
+
+        if(funct3 == 0x0){
+            //BEQ: Branch if Equal
+            branch_taken = (value1 == value2);
         }
+        else if(funct3 == 0x1){
+            //BNE: Branch if not Equal
+            branch_taken = (value1 != value2);
+        }
+
+        else if(funct3 == 0x4){
+            branch_taken = static_cast<int32_t>(value1) < static_cast<int32_t>(value2); //BLT
+        }
+
+        else if(funct3 == 0x5){
+            //BGE : Branch if greater than or equal (signed comparison)
+            branch_taken = static_cast<int32_t>(value1) >= static_cast<int32_t>(value2);
+        }
+
+        else if(funct3 == 0x6){
+            //BLTU : Branch if less than unsigned
+            branch_taken = (value1 < value2);
+        }
+
+        else if(funct3 == 0x7){
+            //BGEU : Branch if greater than or equal unsigned
+            branch_taken = (value1 >= value2);
+        }
+
         else{
-            throw std::invalid_argument("Unsupported branch instruction");
+            throw std::invalid_argument("Unsupported branch instruction: funct3 = " + std::to_string(funct3));
+        }
+
+        if(branch_taken){
+            pc_ += immediate;
+            advance_pc = false;
         }
     }
+    
 
 
     else {
