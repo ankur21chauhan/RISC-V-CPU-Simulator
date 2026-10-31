@@ -214,6 +214,48 @@ int main(){
     assert(jal_x0_cpu.readRegister(0) == 0);
     assert(jal_x0_cpu.getPC() == 8);
 
+
+
+
+    // JALR TESTS
+    // JALR Test1 : Positive immediate
+    CPU jalr_positive_cpu;
+
+    jalr_positive_cpu.setRegister(1, 100);
+
+    // JALR x5, 20(x1)
+    // rd = x5, rs1 = x1 immediate = 20
+
+    jalr_positive_cpu.execute(0x014082E7);
+
+    assert(jalr_positive_cpu.readRegister(5) == 4);
+    assert(jalr_positive_cpu.getPC() == 120);
+
+
+    //JALR Test2 : Negative immediate
+    CPU jalr_negative_cpu;
+
+    jalr_negative_cpu.setRegister(1, 100);
+
+    //JALR x5, -20(x1)
+    jalr_negative_cpu.execute(0xFEC082E7);
+
+    assert(jalr_negative_cpu.readRegister(5) == 4);
+    assert(jalr_negative_cpu.getPC() == 80);
+
+
+    // JALR Test3 : Desitnation is x0
+    CPU jalr_x0_cpu;
+    jalr_x0_cpu.setRegister(1, 100);
+
+    //JALR x0, 20(x1)
+    jalr_x0_cpu.execute(0x01408067);
+
+    assert(jalr_x0_cpu.readRegister(0) == 0);
+    assert(jalr_x0_cpu.getPC() == 120);
+
+
+
     return 0;
 
 }
