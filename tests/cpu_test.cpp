@@ -255,6 +255,56 @@ int main(){
     assert(jalr_x0_cpu.getPC() == 120);
 
 
+    //BEQ Tests
+    //BEQ Test1 : Branch taken (x1 == x2)
+    CPU beq_taken_cpu;
+
+    beq_taken_cpu.setRegister(1, 10);
+    beq_taken_cpu.setRegister(2, 10);
+
+    //BEQ x1, x2, +8
+    beq_taken_cpu.execute(0x00208463);
+
+    assert(beq_taken_cpu.getPC() == 8);
+
+    //BEQ Test2 : Branch not taken (x1 != x2)
+    CPU beq_not_taken_cpu;
+
+    beq_not_taken_cpu.setRegister(1, 10);
+    beq_not_taken_cpu.setRegister(2, 20);
+
+    //BEQ x2, x2, +8   
+    beq_not_taken_cpu.execute(0x00208463);
+    
+    assert(beq_not_taken_cpu.getPC() == 4);
+
+    //BEQ Test3 : Negative branch offset
+    CPU beq_negative_cpu;
+
+    beq_negative_cpu.setRegister(1, 10);
+    beq_negative_cpu.setRegister(2, 10);
+
+    //Set PC to 16 by executing four NOPs
+    beq_negative_cpu.loadProgram({
+        0x00000013, //NOP
+        0x00000013, //NOP
+        0x00000013, //NOP
+        0x00000013, //NOP
+        0xFE208CE3  //BEQ x1, x2, -8
+    });
+
+    assert(beq_negative_cpu.step());
+    assert(beq_negative_cpu.step());
+    assert(beq_negative_cpu.step());
+    assert(beq_negative_cpu.step());
+
+    assert(beq_negative_cpu.getPC() == 16);
+
+    assert(beq_negative_cpu.step());
+
+    assert(beq_negative_cpu.getPC() == 8);
+
+
 
     return 0;
 

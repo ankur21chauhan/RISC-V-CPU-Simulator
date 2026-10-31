@@ -143,6 +143,30 @@ void CPU::execute(uint32_t instruction) {
         advance_pc = false;
 
     }
+
+    else if(opcode == 0x63){
+        //BEQ: if (rs1 == rs2), PC = PC + immediate
+
+        const uint32_t source1 = decoder_.rs1(instruction);
+        const uint32_t source2 = decoder_.rs2(instruction);
+        const uint32_t funct3 = decoder_.funct3(instruction);
+
+        if(funct3 == 0x0){
+            const uint32_t value1 = registers_.read(source1);
+            const uint32_t value2  = registers_.read(source2);
+            const uint32_t immediate = decoder_.immediateB(instruction);
+
+            if(value1 == value2){
+                pc_ += immediate;
+                advance_pc = false;
+            }
+        }
+        else{
+            throw std::invalid_argument("Unsupported branch instruction");
+        }
+    }
+
+
     else {
         throw std::invalid_argument("Unsupported instruction opcode");
     }

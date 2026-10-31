@@ -56,3 +56,22 @@ uint32_t Decoder::immediateJ(uint32_t instruction) const{
 
     return immediate;
 }
+
+
+uint32_t Decoder::immediateB(uint32_t instruction) const{
+    uint32_t immediate = 0;
+
+    //Extract and position the B-type immediate bits.
+    immediate |= ((instruction >> 31) & 0x1) << 12;
+    immediate |= ((instruction >> 25) & 0x3F) << 5;
+    immediate |= ((instruction >> 8) & 0xF) << 1;
+    immediate |= ((instruction >> 7) & 0x1) << 11;
+
+    //Sign-extend the 13-bit immediate
+    if((immediate & 0x1000) != 0){
+        immediate |= 0xFFFFE000;
+    }
+
+    return immediate;
+    
+}

@@ -25,5 +25,21 @@ int main(){
 
     assert(decoder.immediateU(0x12345287) == 0x12345000);
 
+
+    //B-Type immediate tests
+
+
+    //TEST1 : Positive immediate (+8)
+    //BEQ x0, x0, +8
+    assert(decoder.immediateB(0x00000463) == 8);
+
+    //TEST2 : Negative immediate (-8)
+    //BEQ x0, x0, -8
+    assert(decoder.immediateB(0xFE000CE3) == 0xFFFFFFF8);
+
+    //TEST3 : Zero immediate
+    //BEQ x0, x0, 0
+    assert(decoder.immediateB(0x00000063) == 0);
+
     return 0;
 }

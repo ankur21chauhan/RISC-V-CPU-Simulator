@@ -12,8 +12,10 @@ public:
     uint32_t funct7(uint32_t instruction) const;
     uint32_t immediateI(uint32_t instruction) const;
     uint32_t immediateU(uint32_t instruction) const;
-
     uint32_t immediateJ(uint32_t instruction) const;
+    uint32_t immediateB(uint32_t instruction) const;
+    
+
 
 };
 
