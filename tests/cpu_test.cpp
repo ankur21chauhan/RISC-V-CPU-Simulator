@@ -453,6 +453,145 @@ int main(){
     bgeu_unsigned_cpu.setRegister(2, 3);
     bgeu_unsigned_cpu.execute(0x0020F463);
     assert(bgeu_unsigned_cpu.getPC() == 8);
+
+    
+    //----------SLT Tests----------
+    //SLT Test 1 : Signed comparison (5 < 10)
+    CPU slt_taken_cpu;
+    slt_taken_cpu.setRegister(1, 5);
+    slt_taken_cpu.setRegister(2, 10);
+    slt_taken_cpu.execute(0x0020A1B3); //SLT x3, x1, x2
+    assert(slt_taken_cpu.readRegister(3) == 1);
+    
+
+    //SLT Test 2 : Signed comparison (10 < 5 is false)
+    CPU slt_not_taken_cpu;
+    slt_not_taken_cpu.setRegister(1, 10);
+    slt_not_taken_cpu.setRegister(2, 5);
+    slt_not_taken_cpu.execute(0x0020A1B3);
+
+
+    //SLT Test 3 : -1 < 3 is true (signed comparison)
+    CPU slt_signed_cpu;
+    slt_signed_cpu.setRegister(1, 0xFFFFFFFF);
+    slt_signed_cpu.setRegister(2, 3);
+    slt_signed_cpu.execute(0x0020A1B3);
+    assert(slt_signed_cpu.readRegister(3) == 1);
+
+
+
+    //----------SLTU Tests-----------
+    //SLTU Test 1 : Unsigned comparison (5 < 10)
+    CPU sltu_taken_cpu;
+    sltu_taken_cpu.setRegister(1, 5);
+    sltu_taken_cpu.setRegister(2, 10);
+    sltu_taken_cpu.execute(0x0020B1B3); //SLTU x3, x1, x2
+    assert(sltu_taken_cpu.readRegister(3) == 1);
+
+    //SLTU Test 2 : Unsigned comparison (10 < 5 is false)
+    CPU sltu_not_taken_cpu;
+    sltu_not_taken_cpu.setRegister(1, 10);
+    sltu_not_taken_cpu.setRegister(2, 5);
+    sltu_not_taken_cpu.execute(0x0020B1B3);
+    assert(sltu_not_taken_cpu.readRegister(3) == 0);
+
+    //SLTU Test 3 : 0xFFFFFFFF is greater than 3 (unsigned)
+    CPU sltu_unsigned_cpu;
+    sltu_unsigned_cpu.setRegister(1, 0xFFFFFFFF);
+    sltu_unsigned_cpu.setRegister(2, 3);
+    sltu_unsigned_cpu.execute(0x0020B1B3);
+    assert(sltu_unsigned_cpu.readRegister(3) == 0);
+
+
+    //----------AND OR TESts----------
+    //AND: x3 = x1 | x2
+    CPU and_cpu;
+    and_cpu.setRegister(1, 10);
+    and_cpu.setRegister(2, 12);
+    and_cpu.execute(0x0020F1B3);
+
+    assert(and_cpu.readRegister(3) == 8);
+    assert(and_cpu.getPC() == 4);
+
+    //OR: x3 = x1 | x2
+    CPU or_cpu;
+    or_cpu.setRegister(1, 10);
+    or_cpu.setRegister(2, 12);
+    or_cpu.execute(0x0020E1B3);
+
+    assert(or_cpu.readRegister(3) == 14);
+    assert(or_cpu.getPC() == 4);
+
+    //XOR: x3 = x1 ^ x2
+    CPU xor_cpu;
+    xor_cpu.setRegister(1, 10);
+    xor_cpu.setRegister(2, 12);
+    xor_cpu.execute(0x0020C1B3);
+
+    assert(xor_cpu.readRegister(3) == 6);
+    assert(xor_cpu.getPC() == 4);
+
+
+
+    //----------ANDI, ORI and XORI CPU tests--------
+    //ANDI x3, x1, 6
+    CPU andi_cpu;
+    andi_cpu.setRegister(1, 10);
+    andi_cpu.execute(0x0060F193);
+    assert(andi_cpu.readRegister(3) == 2);
+    assert(andi_cpu.getPC() == 4);
+
+
+    //ORI x3, x1, 6
+    CPU ori_cpu;
+    ori_cpu.setRegister(1, 10);
+    ori_cpu.execute(0x0060E193);
+    assert(ori_cpu.readRegister(3) == 14);
+    assert(ori_cpu.getPC() == 4);
+
+
+    //XORI x3, x1, 6
+    CPU xori_cpu;
+    xori_cpu.setRegister(1, 10);
+    xori_cpu.execute(0x0060C193);
+    assert(xori_cpu.readRegister(3) == 12);
+    assert(xori_cpu.getPC() == 4);
+
+    //ANDI with negative immediate: -1
+    CPU andi_negative_cpu;
+    andi_negative_cpu.setRegister(1, 0x12345678);  
+    andi_negative_cpu.execute(0xFFF0F193);
+    assert(andi_negative_cpu.readRegister(3) == 0x12345678);
+
+
+    //---------SLL, SRL and SRA Tests---------
+    //SLL x3, x1, x2
+    CPU sll_cpu;
+    sll_cpu.setRegister(1, 5);
+    sll_cpu.setRegister(2, 1);
+    sll_cpu.execute(0x002091B3);
+    assert(sll_cpu.readRegister(3) == 10);
+    assert(sll_cpu.getPC() == 4);
+
+
+    //SRL x3, x1, x2
+    CPU srl_cpu;
+    srl_cpu.setRegister(1, 20);
+    srl_cpu.setRegister(2, 2);
+    srl_cpu.execute(0x0020D1B3);
+    assert(srl_cpu.readRegister(3) == 5);
+    assert(srl_cpu.getPC() == 4);
+
+    //SRA x3, x1, x2: -8 shifted right by 1 gives -4
+    CPU sra_cpu;
+    sra_cpu.setRegister(1, 0xFFFFFFF8);
+    sra_cpu.setRegister(2, 1);
+    sra_cpu.execute(0x4020D1B3);
+    assert(sra_cpu.readRegister(3) == 0xFFFFFFFC);
+    assert(sra_cpu.getPC() == 4);
+
+
+
     return 0;
 
 }

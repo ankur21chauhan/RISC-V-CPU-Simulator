@@ -52,6 +52,47 @@ void CPU::execute(uint32_t instruction) {
             // SUB: rd = rs1 - rs2
             result = alu_.sub(a, b);
         }
+
+        else if(function3 == 0x2 && function7 == 0x00){
+            //STL: rd = (signed rs1 < signed rs2) ? 1 : 0
+            result = (static_cast<int32_t>(a) < static_cast<int32_t>(b)) ? 1 : 0;
+        }
+
+        else if(function3 == 0x3 && function7 == 0x00){
+            //SLTU: rd  = (unsigned rs1 < unsigned rs2) ? 1 : 0
+            result = (a < b) ? 1 : 0;
+        }
+
+        else if(function3 == 0x7 && function7 == 0x00){
+            //OR: rd = rs1 & rs2
+            result = alu_.bitwiseAnd(a, b);
+        }
+        
+        else if(function3 == 0x6 && function7 == 0x00){
+            //OR: rd = rs1 | rs1
+            result = alu_.bitwiseOr(a, b);
+        }
+
+        else if(function3 == 0x4 && function7 == 0x00){
+            //XOR: rd = rs1 ^ rs2
+            result = alu_.bitwiseXor(a, b);
+        }
+
+        else if(function3 == 0x1 && function7 == 0x00){
+            //SLL: Shift Left Logical
+            result = alu_.shiftLeftLogical(a, b);
+        }
+
+        else if(function3 == 0x5 && function7 == 0x00){
+            //SRL: Shift Rigth Logical
+            result = alu_.shiftRightLogical(a, b);
+        }
+
+        else if(function3 == 0x5 && function7 == 0x20){
+            //SRA: Shift Right Arithmetic
+            result = alu_.shiftRightArithmetic(a, b);
+        }
+        
         else {
             throw std::invalid_argument("Unsupported R-type instruction");
         }
@@ -66,15 +107,30 @@ void CPU::execute(uint32_t instruction) {
         const uint32_t function3 = decoder_.funct3(instruction);
 
         const uint32_t a = registers_.read(source1);
+        const uint32_t immediate = decoder_.immediateI(instruction);
 
         uint32_t result = 0;
 
         if (function3 == 0x0) {
             // ADDI: rd = rs1 + sign-extended immediate
-            const uint32_t immediate = decoder_.immediateI(instruction);
-
             result = alu_.add(a, immediate);
         }
+
+        else if(function3 == 0x7){
+            //ANDI: rd = rs1 & sign-extended immediate
+            result = alu_.bitwiseAnd(a, immediate);
+        }
+
+        else if(function3 == 0x6){
+            //ORI: rd = rs1 | sign-extended immediate
+            result = alu_.bitwiseOr(a, immediate);
+        }
+
+        else if(function3 == 0x4){
+            //XORI : rd = rs1 ^ sign extended immediate
+            result = alu_.bitwiseXor(a, immediate);
+        }
+
         else {
             throw std::invalid_argument("Unsupported I-type instruction");
         }
