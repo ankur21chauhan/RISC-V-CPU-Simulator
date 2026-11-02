@@ -131,6 +131,37 @@ void CPU::execute(uint32_t instruction) {
             result = alu_.bitwiseXor(a, immediate);
         }
 
+        else if(function3 == 0x1){
+            //SLLI: Shift Left Logical Immediate
+            const uint32_t function7 = decoder_.funct7(instruction);
+
+            if(function7 != 0x00){
+                throw std::invalid_argument("Invalid SLLI instruction");
+            }
+
+            const uint32_t shamt = decoder_.rs2(instruction);
+            result = alu_.shiftLeftLogical(a, shamt);
+        }
+
+        else if(function3 == 0x5){
+            //SRLI or SRAI
+            const uint32_t function7 = decoder_.funct7(instruction);
+            const uint32_t shamt = decoder_.rs2(instruction);
+
+            if(function7 == 0x00){
+                //SRLI: Shift Righ logical Immediate
+                result = alu_.shiftRightLogical(a, shamt);
+            }
+
+            else if (function7 == 0x20){
+                //SRAI: Shift Rigth Arithmetic Immediate
+                result = alu_.shiftRightArithmetic(a, shamt);
+            }
+            else{
+                throw std::invalid_argument("Invalid shift immediate instruction");
+            }
+        }
+
         else {
             throw std::invalid_argument("Unsupported I-type instruction");
         }

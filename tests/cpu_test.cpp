@@ -591,7 +591,72 @@ int main(){
     assert(sra_cpu.getPC() == 4);
 
 
+    //------------SLLI, SRLI and SRAI Tests-----------
+    //SLLI x3, x1, 2
+    CPU slli_cpu;
+    slli_cpu.setRegister(1, 5);
+    slli_cpu.execute(0x00209193);
+    assert(slli_cpu.readRegister(3) == 20);
+    assert(slli_cpu.getPC() == 4);
 
+    //SRLI x3, x1, 1
+    CPU srli_cpu;
+    srli_cpu.setRegister(1, 20);
+    srli_cpu.execute(0x0010D193);
+    assert(srli_cpu.readRegister(3) == 10);
+    assert(srli_cpu.getPC() == 4);
+
+    //SRAI x3, x1, 2
+    // -8 >> 2 = -2
+    CPU srai_cpu;
+    srai_cpu.setRegister(1, 0xFFFFFFF8);
+    srai_cpu.execute(0x4020D193);
+    assert(srai_cpu.readRegister(3) == 0xFFFFFFFE);
+    assert(srai_cpu.getPC() == 4);
+
+    //---------MALFORMED Shift Instruction Tests-----------
+    //Invalid SLLI: funct7 must be 0x00
+    CPU invalid_slli_cpu;
+    bool invalid_slli_thrown = false;
+
+    try{
+        invalid_slli_cpu.execute(0x02209193);
+    }
+    catch(const std::invalid_argument&){
+        invalid_slli_thrown = true;
+    }
+
+    assert(invalid_slli_thrown);
+
+
+    //Invalid SRLI: funct7 must be 0x00
+    CPU invalid_srli_cpu;
+    bool invalid_srli_thrown = false;
+
+    try{
+        invalid_srli_cpu.execute(0x0220D193);
+    }
+
+    catch (const std::invalid_argument&){
+        invalid_srli_thrown = true;
+    }
+
+    assert(invalid_srli_thrown);
+
+    //Invalid SRAI: funct7 mus be exactly 0x20
+    CPU invalid_srai_cpu;
+    bool invalid_srai_thrown = false;
+
+    try{
+        invalid_srai_cpu.execute(0x4220D193);
+    }
+    
+    catch (const std::invalid_argument&){
+        invalid_srai_thrown = true;
+    }
+
+    assert(invalid_srai_thrown);
+    
     return 0;
 
 }
