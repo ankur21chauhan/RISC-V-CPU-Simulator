@@ -1,17 +1,19 @@
 # RISC-V CPU Simulator
 
-A RISC-V CPU simulator built from scratch in **C++17** to explore processor architecture, instruction decoding, arithmetic execution, control flow, and eventually five-stage instruction pipelining.
+A RISC-V CPU simulator built from scratch in **C++17** to explore processor architecture, instruction decoding, arithmetic execution, control flow, memory operations, and eventually five-stage instruction pipelining.
 
-The project is being developed incrementally, with an emphasis on modular C++ design, automated testing, and understanding how CPU components work together.
+The project is developed incrementally, emphasizing modular C++ design, automated testing, architectural correctness, and understanding how CPU components work together.
 
 ## Project Goals
 
 - Understand how CPU components work together.
-- Implement a subset of RISC-V RV32I instructions.
-- Model registers, instruction execution, and memory operations.
+- Implement a selected subset of RISC-V RV32I instructions.
+- Model registers, instruction execution, and data memory operations.
 - Build a five-stage instruction pipeline.
 - Explore data hazards, forwarding, stalls, and control hazards.
 - Measure performance using clock cycles, CPI, and speedup.
+
+---
 
 ## Current Implementation
 
@@ -21,8 +23,8 @@ The project is being developed incrementally, with an emphasis on modular C++ de
 - [x] CMake build configuration
 - [x] Register file with 32 integer registers
 - [x] Register initialization and read/write operations
-- [x] Enforce the zero-register behavior (`x0`)
-- [x] Arithmetic Logic Unit (ALU) with addition and subtraction
+- [x] Enforce zero-register behavior (`x0`)
+- [x] Arithmetic Logic Unit (ALU)
 - [x] Instruction decoder for supported instruction fields and immediates
 - [x] Basic CPU instruction execution engine
 - [x] Instruction memory using a vector of 32-bit instructions
@@ -30,54 +32,122 @@ The project is being developed incrementally, with an emphasis on modular C++ de
 - [x] Instruction fetching and execution through `step()`
 - [x] Program Counter initialization and advancement
 - [x] PC alignment checking during instruction fetching
+- [x] Byte-addressable data memory
+- [x] Little-endian memory read and write operations
+- [x] Data memory bounds checking
 - [x] CMake/CTest integration for four test suites
 
 ### Implemented Instructions
 
+The CPU currently supports the following selected RV32I instructions.
+
 | Instruction | Type | Operation | Status |
 |---|---|---|---|
-| `ADD` | R-type | Add two register values | Implemented |
-| `SUB` | R-type | Subtract one register value from another | Implemented |
-| `ADDI` | I-type | Add a sign-extended immediate to a register value | Implemented |
-| `LUI` | U-type | Load an upper immediate | Implemented |
-| `AUIPC` | U-type | Add an upper immediate to the current PC | Implemented |
-| `JAL` | J-type | Save the return address and jump to a PC-relative target | Implemented |
-| `JALR` | I-type | Save the return address and jump to a register-relative target | Implemented |
-| `BEQ` | B-type | Branch if two registers are equal | Implemented |
-| `BNE` | B-type | Branch if two registers are not equal | Implemented |
-| `BLT` | B-type | Branch if signed `rs1 < rs2` | Implemented |
-| `BGE` | B-type | Branch if signed `rs1 >= rs2` | Implemented |
-| `BLTU` | B-type | Branch if unsigned `rs1 < rs2` | Implemented |
-| `BGEU` | B-type | Branch if unsigned `rs1 >= rs2` | Implemented |
+| `ADD` | R-type | Add two registers | Implemented |
+| `SUB` | R-type | Subtract two registers | Implemented |
+| `SLT` | R-type | Signed comparison | Implemented |
+| `SLTU` | R-type | Unsigned comparison | Implemented |
+| `AND` | R-type | Bitwise AND | Implemented |
+| `OR` | R-type | Bitwise OR | Implemented |
+| `XOR` | R-type | Bitwise XOR | Implemented |
+| `SLL` | R-type | Logical left shift | Implemented |
+| `SRL` | R-type | Logical right shift | Implemented |
+| `SRA` | R-type | Arithmetic right shift | Implemented |
+| `ADDI` | I-type | Add immediate | Implemented |
+| `ANDI` | I-type | Bitwise AND immediate | Implemented |
+| `ORI` | I-type | Bitwise OR immediate | Implemented |
+| `XORI` | I-type | Bitwise XOR immediate | Implemented |
+| `SLLI` | I-type | Logical left shift immediate | Implemented |
+| `SRLI` | I-type | Logical right shift immediate | Implemented |
+| `SRAI` | I-type | Arithmetic right shift immediate | Implemented |
+| `LB` | I-type | Load byte (signed) | Implemented |
+| `LH` | I-type | Load halfword (signed) | Implemented |
+| `LW` | I-type | Load word | Implemented |
+| `LBU` | I-type | Load byte (unsigned) | Implemented |
+| `LHU` | I-type | Load halfword (unsigned) | Implemented |
+| `LUI` | U-type | Load upper immediate | Implemented |
+| `AUIPC` | U-type | Add upper immediate to PC | Implemented |
+| `JAL` | J-type | Jump and link | Implemented |
+| `JALR` | I-type | Jump and link register | Implemented |
+| `BEQ` | B-type | Branch if equal | Implemented |
+| `BNE` | B-type | Branch if not equal | Implemented |
+| `BLT` | B-type | Branch if signed less than | Implemented |
+| `BGE` | B-type | Branch if signed greater than or equal | Implemented |
+| `BLTU` | B-type | Branch if unsigned less than | Implemented |
+| `BGEU` | B-type | Branch if unsigned greater than or equal | Implemented |
+| `SB` | S-type | Store byte | Implemented |
+| `SH` | S-type | Store halfword | Implemented |
+| `SW` | S-type | Store word | Implemented |
 
-These instructions have been added to the CPU execution engine. Test coverage is expanding alongside implementation; passing the current test suites does not imply every possible instruction edge case has been tested.
+**Instruction support is limited to the selected RV32I subset listed above. This project does not claim complete RV32I compliance.**
 
-### Jump and Branch Testing
+### Instruction Testing
 
-Tests currently cover selected behavior such as:
+Automated tests cover selected instruction behavior, including:
 
-- `JAL` positive and negative offsets
-- Saving the return address as `PC + 4`
-- Jumping to the calculated target address
-- Writing to `x0` without changing its value
-- `JALR` positive and negative offsets, and `x0` destination behavior
-- B-type immediate extraction, including positive, negative, and zero offsets
-- Conditional branch taken and not-taken behavior
-- Signed and unsigned comparison examples for branch instructions
+- Arithmetic and logical operations.
+- Signed and unsigned comparisons.
+- Immediate extraction and sign extension.
+- Shift operations and malformed shift encodings.
+- Positive and negative jump offsets.
+- Return address calculation (`PC + 4`).
+- Conditional branch taken and not-taken behavior.
+- Signed and unsigned branch comparisons.
+- Load and store integration.
+- Signed and unsigned byte/halfword loading.
+- Data memory byte ordering and bounds checking.
+- Register zero behavior.
+- Unsupported instruction rejection.
 
-Additional edge-case coverage will be added as the instruction set expands.
+CPU integration tests verify that stores and loads operate correctly through the CPU execution engine.
 
-## Current Limitations
+Test coverage will continue to expand as the simulator develops.
 
-- Only a subset of RV32I instructions is supported.
-- Additional arithmetic, logical, comparison, and shift instructions remain to be implemented, including `SLT` and `SLTU`.
-- Data memory and load/store instructions are not yet implemented.
-- The current simulator does not implement a five-stage instruction pipeline.
-- Pipeline registers, hazard detection, forwarding, stalls, and control-hazard handling remain future work.
-- Performance analysis using CPI, clock cycles, and speedup has not yet been implemented.
-- The instruction set and test coverage will expand as development progresses.
+---
 
-## Planned Features
+## Project Architecture
+
+The CPU execution engine coordinates the following components:
+
+| Component | Responsibility |
+|---|---|
+| Register File | Stores 32 integer registers and enforces the `x0` zero-register rule |
+| ALU | Performs supported arithmetic, logical, comparison, and shift operations |
+| Decoder | Extracts instruction fields and immediate values |
+| CPU | Executes supported instructions and manages processor state |
+| Instruction Memory | Stores program instructions as 32-bit words |
+| Data Memory | Provides byte-addressable memory for load and store instructions |
+
+### Data Memory
+
+The simulator includes a byte-addressable data memory implemented using a C++ vector of 8-bit values.
+
+Features include:
+
+- Byte, halfword, and word read operations.
+- Byte, halfword, and word write operations.
+- Little-endian memory representation.
+- Address bounds checking.
+- Integration with CPU load and store instructions.
+
+The CPU currently initializes its data memory with a size of 1024 bytes.
+
+### Program Execution Flow
+
+1. Load a program into instruction memory using `loadProgram()`.
+2. Fetch the instruction at the address specified by the PC.
+3. Decode the instruction fields and immediate values.
+4. Read the required register operands.
+5. Execute the supported operation.
+6. Access data memory when required.
+7. Write the result to the destination register when required.
+8. Update the PC according to the instruction's behavior.
+
+The `step()` method fetches and executes one instruction. It returns `false` when execution reaches the end of instruction memory.
+
+---
+
+## Development Roadmap
 
 ### Phase 1 — Core CPU Components
 
@@ -86,6 +156,8 @@ Additional edge-case coverage will be added as the instruction set expands.
 - [x] Instruction Decoder
 - [x] Basic CPU execution engine
 - [x] Automated component tests
+
+**Status: Completed**
 
 ### Phase 2 — Expanded Instruction Execution
 
@@ -96,11 +168,13 @@ Additional edge-case coverage will be added as the instruction set expands.
 - [x] `JAL`
 - [x] `JALR`
 - [x] Conditional branches: `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, `BGEU`
-- [ ] Remaining selected RV32I arithmetic, logical, comparison, and shift instructions (including `SLT` and `SLTU`)
-- [ ] Data memory
-- [ ] Load instructions: `LB`, `LH`, `LW`, `LBU`, `LHU`
-- [ ] Store instructions: `SB`, `SH`, `SW`
-- [ ] Expanded automated tests and edge-case validation
+- [x] Selected arithmetic, logical, comparison, and shift instructions
+- [x] Data memory implementation
+- [x] Load instructions: `LB`, `LH`, `LW`, `LBU`, `LHU`
+- [x] Store instructions: `SB`, `SH`, `SW`
+- [x] Expanded automated tests and CPU integration tests
+
+**Status: Implementation completed; four CTest suites passing.**
 
 ### Phase 3 — Five-Stage Pipeline
 
@@ -124,33 +198,11 @@ Additional edge-case coverage will be added as the instruction set expands.
 
 **Features will be marked complete only after implementation and testing.**
 
-## Architecture
+---
 
-The current CPU execution engine coordinates the Register File, ALU, Decoder, instruction memory, and Program Counter.
+## Planned Five-Stage Pipeline
 
-| Component | Responsibility |
-|---|---|
-| Register File | Stores 32 integer registers and enforces the `x0` zero-register rule |
-| ALU | Performs supported arithmetic operations, currently addition and subtraction |
-| Decoder | Extracts instruction fields and immediate values |
-| CPU | Executes supported instructions, manages register writes, loads programs, fetches instructions, and updates the PC |
-| Instruction Memory | Stores the program as 32-bit instruction words |
-
-### Program Execution Flow
-
-1. Load a program into instruction memory using `loadProgram()`.
-2. Fetch the instruction at the address specified by the PC.
-3. Decode the instruction fields and immediate values.
-4. Read the required register operands.
-5. Execute the supported operation.
-6. Write the result or return address to the destination register, when required.
-7. Update the PC according to the instruction's behavior.
-
-The `step()` method fetches and executes one instruction. It returns `false` when execution reaches the end of instruction memory.
-
-### Planned Five-Stage Pipeline
-
-The target processor will use the classic five-stage pipeline:
+The next major architectural milestone is implementing the classic five-stage processor pipeline.
 
 | Stage | Name | Responsibility |
 |---|---|---|
@@ -162,6 +214,8 @@ The target processor will use the classic five-stage pipeline:
 
 The intended design will allow multiple instructions to occupy different pipeline stages during the same clock cycle.
 
+---
+
 ## Technology Stack
 
 - **Language:** C++17
@@ -169,6 +223,8 @@ The intended design will allow multiple instructions to occupy different pipelin
 - **Compiler:** GCC or another compatible C++17 compiler
 - **Version control:** Git
 - **Testing:** C++ assertions integrated with CTest
+
+---
 
 ## Getting Started
 
@@ -205,7 +261,7 @@ cmake --build build
 
 The executable currently demonstrates a small hardcoded program using supported instructions.
 
-### Run the Automated Tests
+### Run Automated Tests
 
 ```bash
 ctest --test-dir build --output-on-failure
@@ -218,7 +274,9 @@ The project currently contains four test suites:
 - `DecoderTest`
 - `CPUTest`
 
-These suites cover register behavior, arithmetic operations, instruction decoding, and supported CPU instruction execution. The current local test run reports all four suites passing.
+The current local test run reports all four suites passing.
+
+---
 
 ## Project Structure
 
@@ -231,13 +289,15 @@ RISC-V-CPU-Simulator/
 │   ├── register_file.hpp
 │   ├── alu.hpp
 │   ├── decoder.hpp
-│   └── cpu.hpp
+│   ├── cpu.hpp
+│   └── data_memory.hpp
 ├── src/
 │   ├── main.cpp
 │   ├── register_file.cpp
 │   ├── alu.cpp
 │   ├── decoder.cpp
-│   └── cpu.cpp
+│   ├── cpu.cpp
+│   └── data_memory.cpp
 ├── tests/
 │   ├── register_file_test.cpp
 │   ├── alu_test.cpp
@@ -248,6 +308,8 @@ RISC-V-CPU-Simulator/
 ```
 
 The project structure will evolve as additional CPU components, memory models, and pipeline stages are introduced.
+
+---
 
 ## Design Principles
 
@@ -263,25 +325,32 @@ The project structure will evolve as additional CPU components, memory models, a
 
 This project is intended to build practical understanding of:
 
-- Computer organization and architecture
-- RISC-V instruction encoding and semantics
-- C++ classes and modular design
-- Bit manipulation and fixed-width integer arithmetic
-- CPU registers, ALU operations, and instruction execution
-- Instruction fetching and Program Counter management
-- Instruction pipelining and hazards
-- Debugging, automated testing, and build systems
-- Processor performance metrics
+- Computer organization and architecture.
+- RISC-V instruction encoding and semantics.
+- C++ classes and modular design.
+- Bit manipulation and fixed-width integer arithmetic.
+- CPU registers, ALU operations, and instruction execution.
+- Instruction fetching and Program Counter management.
+- Data memory and load/store operations.
+- Instruction pipelining and hazards.
+- Debugging, automated testing, and build systems.
+- Processor performance metrics.
+
+---
 
 ## Project Status
 
-**Core CPU components implemented; expanded RV32I instruction support in progress.**
+**Phase 1 and Phase 2 implementation completed.**
 
-The Register File, ALU, Decoder, instruction memory, and basic CPU execution engine are implemented. The current execution engine supports `ADD`, `SUB`, `ADDI`, `LUI`, `AUIPC`, `JAL`, `JALR`, `BEQ`, `BNE`, `BLT`, `BGE`, `BLTU`, and `BGEU`.
+The simulator currently includes a Register File, ALU, Instruction Decoder, instruction memory, CPU execution engine, and byte-addressable data memory.
 
-The project currently has four CTest suites, and the latest local run reported all four passing. Instruction-specific edge-case coverage will continue to expand.
+It supports a selected subset of RV32I instructions covering arithmetic, logical operations, comparisons, shifts, immediate operations, jumps, branches, loads, and stores.
 
-The next milestones are additional arithmetic, logical, comparison, and shift instructions; data memory operations; and eventually the five-stage pipeline with hazard handling and performance analysis.
+The project currently has four CTest suites, with the latest local test run reporting all four passing.
+
+The next development milestone is **Phase 3: Five-Stage Instruction Pipeline**, followed by hazard handling and performance analysis.
+
+---
 
 ## License
 
