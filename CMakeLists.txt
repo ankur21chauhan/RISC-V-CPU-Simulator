@@ -15,6 +15,7 @@ add_executable(riscv-sim
     src/register_file.cpp
 	src/alu.cpp
 	src/decoder.cpp
+	src/data_memory.cpp
 	src/cpu.cpp
 )
 
@@ -95,6 +96,7 @@ add_executable(cpu_test
 	src/register_file.cpp
 	src/alu.cpp
 	src/decoder.cpp
+	src/data_memory.cpp
 )
 
 target_include_directories(cpu_test PRIVATE include)

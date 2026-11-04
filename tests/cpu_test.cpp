@@ -309,8 +309,7 @@ int main(){
 
 
 
-
-    //-----------BNE Tests--------------
+    //-----------BNETests--------------
     //BNE Test1 : Branch taken (x1 != x2)
     CPU bne_taken_cpu;
 
@@ -657,6 +656,43 @@ int main(){
 
     assert(invalid_srai_thrown);
     
+
+    //-----------SW + LW Integration Test-------------
+
+    CPU memory_cpu;
+
+    memory_cpu.loadProgram({
+        0x06400093, //ADDI x1, x0, 100
+        0x02A00113, //ADDI x2, x0, 42
+        0x0020A023, //SW x2, 0(x1)
+        0x0000A183 //LW x3, 0(x1)
+    });
+
+    //Execute ADDI x1, x0, 100
+    assert(memory_cpu.step());
+    assert(memory_cpu.readRegister(1) == 100);
+    assert(memory_cpu.getPC() == 4);
+
+    //Execute ADDI x2, x0, 42
+    assert(memory_cpu.step());
+    assert(memory_cpu.readRegister(2) == 42);
+    assert(memory_cpu.getPC() == 8);
+
+    //Execute SW x2, 0(x1)
+    assert(memory_cpu.step());
+    assert(memory_cpu.getPC() == 12);
+
+    //Execute LW x3, 0(x1)
+    assert(memory_cpu.step());
+    assert(memory_cpu.readRegister(3) == 42);
+    assert(memory_cpu.getPC() == 16);
+
+    //No more instructions
+    assert(!memory_cpu.step());
+
+    std::cout<<"SW + LW integration test passed!\n";
+
+
     return 0;
 
 }

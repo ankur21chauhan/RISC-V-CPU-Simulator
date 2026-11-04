@@ -1,7 +1,8 @@
 #include "cpu.hpp"
 #include <stdexcept>
 
-CPU::CPU() : pc_(0) {}
+CPU::CPU()
+    : data_memory_(1024), pc_(0) {}
 
 void CPU::loadProgram(const std::vector<uint32_t>& program) {
     instruction_memory_ = program;
@@ -67,7 +68,7 @@ void CPU::execute(uint32_t instruction) {
             //OR: rd = rs1 & rs2
             result = alu_.bitwiseAnd(a, b);
         }
-        
+
         else if(function3 == 0x6 && function7 == 0x00){
             //OR: rd = rs1 | rs1
             result = alu_.bitwiseOr(a, b);
@@ -92,7 +93,7 @@ void CPU::execute(uint32_t instruction) {
             //SRA: Shift Right Arithmetic
             result = alu_.shiftRightArithmetic(a, b);
         }
-        
+
         else {
             throw std::invalid_argument("Unsupported R-type instruction");
         }
@@ -168,7 +169,9 @@ void CPU::execute(uint32_t instruction) {
 
         registers_.write(destination, result);
     }
-    
+
+
+
     // LUI BLOCK
     else if(opcode == 0x37){ //0x37 LUI opcode
         const uint32_t destination = decoder_.rd(instruction);
@@ -210,7 +213,7 @@ void CPU::execute(uint32_t instruction) {
         if(decoder_.funct3(instruction) != 0){
             throw std::invalid_argument("Invalid JALR funct3");
         }
-        
+
         //JALR: rd = PC + 4; PC = (rs1 + immediate) & -1
 
         const uint32_t destination = decoder_.rd(instruction);
@@ -283,15 +286,60 @@ void CPU::execute(uint32_t instruction) {
             advance_pc = false;
         }
     }
-    
 
+    //SW (Store Word)
+    else if(opcode == 0x23){
+        //S-type Store instruction
+
+        const uint32_t source1 = decoder_.rs1(instruction);
+        const uint32_t source2 = decoder_.rs2(instruction);
+        const uint32_t funct3 = decoder_.funct3(instruction);
+
+        const uint32_t base_address = registers_.read(source1);
+        const uint32_t value = registers_.read(source2);
+        const uint32_t immediate = decoder_.immediateS(instruction);
+
+        const uint32_t address = base_address + immediate;
+
+        if(funct3 == 0x2){
+            //SW: Store Word (32 bit);
+            data_memory_.storeWord(address, value);
+        }
+        else{
+            throw std::invalid_argument("Unsupported store instruction: funct3 = " + std::to_string(funct3));
+        }
+    }
+
+    //LW (Load Word)
+    else if(opcode == 0x03){
+        //I-type: Load instruction
+
+        const uint32_t rd = decoder_.rd(instruction);
+        const uint32_t rs1 = decoder_.rs1(instruction);
+        const uint32_t funct3 = decoder_.funct3(instruction);
+
+        const uint32_t base_address = registers_.read(rs1);
+        const uint32_t immediate = decoder_.immediateI(instruction);
+        const uint32_t address = base_address + immediate;
+
+        if(funct3 == 0x2){
+            //LW: Load word (32 bit)
+
+            const uint32_t value = data_memory_.loadWord(address);
+
+            registers_.write(rd, value);
+        }
+        else{
+            throw std::invalid_argument("Unsupported load instruction: funct3 = " + std::to_string(funct3));
+        }
+    }
 
     else {
         throw std::invalid_argument("Unsupported instruction opcode");
     }
 
     // Advance PC only after successful instruction execution.
-    
+
     if(advance_pc){
         pc_ += 4;
     }

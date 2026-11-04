@@ -41,5 +41,21 @@ int main(){
     //BEQ x0, x0, 0
     assert(decoder.immediateB(0x00000063) == 0);
 
+
+
+    //Test: S-type positive immediate
+    uint32_t positive_s = 0x0020A623;
+
+    assert(decoder.immediateS(positive_s) == 12);
+
+    std::cout<<"S-type positive immediate passed.\n";
+
+    //Test: S-type negative immediate
+    uint32_t negative_s = 0xFE20AE23;
+
+    assert(decoder.immediateS(negative_s) == 0xFFFFFFFC);
+
+    std::cout<<"S-type negative immediate passed.\n";
+
     return 0;
 }

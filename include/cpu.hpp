@@ -7,6 +7,7 @@
 #include "register_file.hpp"
 #include "alu.hpp"
 #include "decoder.hpp"
+#include "data_memory.hpp"
 
 class CPU{
     public:
@@ -26,9 +27,12 @@ class CPU{
         ALU alu_; //arithmetic operations
         Decoder decoder_; //will extract fields of machine instructions
 
+        DataMemory data_memory_;
+
         std::vector<uint32_t> instruction_memory_;
 
         uint32_t pc_;  //Program Counter
+
 
 };
 

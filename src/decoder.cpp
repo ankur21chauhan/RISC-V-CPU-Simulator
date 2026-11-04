@@ -35,6 +35,23 @@ uint32_t Decoder::immediateI(uint32_t instruction) const{
     return immediate;
 }
 
+uint32_t Decoder::immediateS(uint32_t instruction) const{
+    uint32_t immediate = 0;
+
+    //Extract imm[11:5] from bits 31:25
+    immediate |= ((instruction >> 25) & 0x7F) << 5;
+
+    //Extract imm[4:0] from bits 11:7
+    immediate |= (instruction >> 7) & 0x1F;
+
+    //Sign-extend the 12-bit immediate
+    if((immediate & 0x800) != 0){
+        immediate |= 0xFFFFF000;
+    }
+
+    return immediate;
+}
+
 
 uint32_t Decoder::immediateU(uint32_t instruction) const{
     return instruction & 0xFFFFF000; //0xFFFFF000 is a bitmask

@@ -12,6 +12,8 @@ public:
     uint16_t loadHalfWord(uint32_t address) const; //2 bytes read
     uint32_t loadWord(uint32_t address) const; //4 bytes read
 
+    void storeByte(uint32_t address, uint8_t value);
+    void storeHalfWord(uint32_t address, uint16_t value);
     void storeWord(uint32_t address, uint32_t value);
 
     uint32_t size() const; //will return total size of the memory
