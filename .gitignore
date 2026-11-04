@@ -3,3 +3,5 @@ riscv-sim
 *.o
 *.a
 *.so
+#Ctest genrated files
+Testing/
