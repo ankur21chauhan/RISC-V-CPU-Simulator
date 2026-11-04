@@ -693,6 +693,94 @@ int main(){
     std::cout<<"SW + LW integration test passed!\n";
 
 
+
+    //----------SB + SH Integration Tests-----------
+    CPU store_byte_halfword_cpu;
+
+    store_byte_halfword_cpu.loadProgram({
+        0x06400093, //ADDI x1, x0, 100
+        0x02A00113, //ADDI x2, x0, 42
+        0x00208023, //SB x2, 0(x1)
+        0x00209123, //SH x2, 2(x1)
+        0x0000A183, //LW x3, 0(x1)
+        0x0000A203  //LW x4, 0(x1)
+    });
+
+    //Initialize base address
+    assert(store_byte_halfword_cpu.step());
+    assert(store_byte_halfword_cpu.readRegister(1) == 100);
+
+    //Initialize source value
+    assert(store_byte_halfword_cpu.step());
+    assert(store_byte_halfword_cpu.readRegister(2) == 42);
+
+    //SB: Store 1 byte at address 100
+    assert(store_byte_halfword_cpu.step());
+    assert(store_byte_halfword_cpu.getPC() == 12);
+
+    //SH: Store 2 bytes at address 102
+    assert(store_byte_halfword_cpu.step());
+    assert(store_byte_halfword_cpu.getPC() == 16);
+
+    //LW: Read all 4 bytes starting at address 100
+    assert(store_byte_halfword_cpu.step());
+    assert(store_byte_halfword_cpu.readRegister(3) == 0x002A002Au);
+
+    assert(store_byte_halfword_cpu.step());
+    assert(store_byte_halfword_cpu.readRegister(4) == 0x002A002Au);
+
+    assert(store_byte_halfword_cpu.getPC() == 24);
+
+    std::cout<<"SB + SH integration tests passed! \n";
+
+
+    //----------LB, LH, LBU, LHU Integration Tests--------
+    CPU load_byte_halfword_cpu;
+
+    load_byte_halfword_cpu.loadProgram({
+        0x06400093, // ADDI x1, x0, 100
+        0xFFF00113, // ADDI x2, x0, -1
+        0x0020A023, // SW x2, 0(x1)
+        0x00008183, // LB  x3, 0(x1)
+        0x0000C203, // LBU x4, 0(x1)
+        0x00009283, // LH  x5, 0(x1)
+        0x0000D303  // LHU x6, 0(x1)
+    });
+
+    //Initialize base address
+    assert(load_byte_halfword_cpu.step());
+    assert(load_byte_halfword_cpu.readRegister(1) == 100);
+
+    //Initialize source value (-1)
+    assert(load_byte_halfword_cpu.step());
+    assert(load_byte_halfword_cpu.readRegister(2) == 0xFFFFFFFFu);
+
+    //Store 0xFFFFFFFF into memory
+    assert(load_byte_halfword_cpu.step());
+
+    //LB: Signed byte load
+    assert(load_byte_halfword_cpu.step());
+    assert(load_byte_halfword_cpu.readRegister(3) == 0xFFFFFFFFu);
+
+    //LBU: unsigned byte load
+    assert(load_byte_halfword_cpu.step());
+    assert(load_byte_halfword_cpu.readRegister(4) == 0x000000FFu);
+
+    //LH: signed halfword load
+    assert(load_byte_halfword_cpu.step());
+    assert(load_byte_halfword_cpu.readRegister(5) == 0xFFFFFFFFu);
+
+    //LHU: unsigned halfword load
+    assert(load_byte_halfword_cpu.step());
+    assert(load_byte_halfword_cpu.readRegister(6) == 0x0000FFFFu);
+
+    assert(load_byte_halfword_cpu.getPC() == 28);
+    assert(!load_byte_halfword_cpu.step());
+
+    std::cout<<"LB + LH + LBU + LHU integration tests passed!\n";
+
+
+
     return 0;
 
 }

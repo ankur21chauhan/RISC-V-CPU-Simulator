@@ -301,8 +301,16 @@ void CPU::execute(uint32_t instruction) {
 
         const uint32_t address = base_address + immediate;
 
-        if(funct3 == 0x2){
-            //SW: Store Word (32 bit);
+        if(funct3 == 0x0){
+            //SB: Store Byte (8 bit);
+            data_memory_.storeByte(address, static_cast<uint8_t>(value));
+        }
+        else if(funct3 == 0x1){
+            //SH: Store HalfWord (16 bit)
+            data_memory_.storeHalfWord(address, static_cast<uint16_t>(value));
+        }
+        else if(funct3 == 0x2){
+            //SW: Store Word (32 bit)
             data_memory_.storeWord(address, value);
         }
         else{
@@ -322,16 +330,54 @@ void CPU::execute(uint32_t instruction) {
         const uint32_t immediate = decoder_.immediateI(instruction);
         const uint32_t address = base_address + immediate;
 
-        if(funct3 == 0x2){
-            //LW: Load word (32 bit)
+        uint32_t value = 0;
 
-            const uint32_t value = data_memory_.loadWord(address);
+        if(funct3 == 0x0){
+            //LB : Load Byte (8-bit, signed)
 
-            registers_.write(rd, value);
+            const uint32_t raw = data_memory_.loadByte(address);
+
+            if(raw & 0x80u){
+                value = raw | 0xFFFFFF00u;
+            }
+            else{
+                value = raw;
+            }
         }
+
+        else if (funct3 == 0x1){
+            //Load HalfWord(16-bit, signed)
+
+            const uint32_t raw = data_memory_.loadHalfWord(address);
+
+            if(raw & 0x8000u){
+                value = raw | 0xFFFF0000u;
+            }
+            else{
+                value = raw;
+            }
+        }
+
+        else if(funct3 == 0x2){
+            //LW: Load Word (32-bit)
+            value = data_memory_.loadWord(address);
+        }
+
+        else if(funct3 == 0x4){
+            //LBU: Load Byte (8-bit, un signed)
+            value = data_memory_.loadByte(address);
+        }
+
+        else if(funct3 == 0x5){
+            //LHU: Load HalfWord (16-bit, unsigned)
+            value = data_memory_.loadHalfWord(address);
+        }
+
         else{
             throw std::invalid_argument("Unsupported load instruction: funct3 = " + std::to_string(funct3));
         }
+
+        registers_.write(rd, value);
     }
 
     else {
