@@ -70,50 +70,61 @@ if(BUILD_TESTING)
 
 #Decoder test
 
-add_executable(decoder_test
-	tests/decoder_test.cpp
-	src/decoder.cpp
-)
+	add_executable(decoder_test
+		tests/decoder_test.cpp
+		src/decoder.cpp
+	)
 
-target_include_directories(decoder_test PRIVATE include)
+	target_include_directories(decoder_test PRIVATE include)
 
-target_compile_options(decoder_test PRIVATE
-	-Wall
-	-Wextra
-	-Wpedantic
-)
-add_test(
-	NAME DecoderTest
-	COMMAND decoder_test
-)
-
-
-#CPU TEST
-
-add_executable(cpu_test
-	tests/cpu_test.cpp
-	src/cpu.cpp
-	src/register_file.cpp
-	src/alu.cpp
-	src/decoder.cpp
-	src/data_memory.cpp
-)
-
-target_include_directories(cpu_test PRIVATE include)
-
-target_compile_options(cpu_test PRIVATE
-	-Wall
-	-Wextra
-	-Wpedantic
-)
-
-add_test(
-	NAME CPUTest
-	COMMAND cpu_test
-)
+	target_compile_options(decoder_test PRIVATE
+		-Wall
+		-Wextra
+		-Wpedantic
+	)
+	add_test(
+		NAME DecoderTest
+		COMMAND decoder_test
+	)
 
 
+	#CPU TEST
 
+	add_executable(cpu_test
+		tests/cpu_test.cpp
+		src/cpu.cpp
+		src/register_file.cpp
+		src/alu.cpp
+		src/decoder.cpp
+		src/data_memory.cpp
+	)
+
+	target_include_directories(cpu_test PRIVATE include)
+
+	target_compile_options(cpu_test PRIVATE
+		-Wall
+		-Wextra
+		-Wpedantic
+	)
+
+	add_test(
+		NAME CPUTest
+		COMMAND cpu_test
+	)
+
+#Pipeline Simulator Test
+	add_executable(pipeline_simulator_test
+		tests/pipeline_simulator_test.cpp
+		src/pipeline_simulator.cpp
+	)
+
+	target_include_directories(pipeline_simulator_test PRIVATE include)
+
+	target_compile_options(pipeline_simulator_test PRIVATE 
+		-Wall -Wextra -Wpedantic
+	)
+
+	add_test(NAME PipelineSimulatorTest COMMAND pipeline_simulator_test)
 
 
 endif()
